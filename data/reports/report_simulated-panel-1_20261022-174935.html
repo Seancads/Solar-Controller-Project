@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Last 24 hours · Simulated panel</title>
+
+<style>
+  :root { color-scheme: light; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+         color: #1a1a24; background: #fff; margin: 0; padding: 28px; line-height: 1.45; }
+  .page { max-width: 820px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 2px; }
+  h2 { font-size: 1.05rem; margin: 26px 0 8px; }
+  .sub { color: #5b5b6e; margin: 0; }
+  .toolbar { display: flex; gap: 10px; margin-bottom: 18px; }
+  .toolbar button, .toolbar a { font: inherit; font-size: 0.85rem; padding: 7px 14px; border-radius: 8px;
+         border: 1px solid #c9c9d6; background: #f4f4f8; color: #1a1a24; text-decoration: none; cursor: pointer; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; }
+  .card { border: 1px solid #dcdce6; border-radius: 10px; padding: 10px 12px; }
+  .card .k { font-size: 0.72rem; color: #5b5b6e; }
+  .card .v { font-size: 1.25rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .note { border: 1px solid #e6c875; background: #fff8e1; border-radius: 8px; padding: 8px 12px; margin-top: 14px; font-size: 0.85rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  th, td { padding: 5px 8px; border-bottom: 1px solid #e6e6ee; text-align: right; }
+  th:first-child, td:first-child { text-align: left; white-space: nowrap; }
+  th { background: #f4f4f8; font-weight: 600; }
+  svg { width: 100%; height: auto; display: block; }
+  .legend { font-size: 0.78rem; color: #5b5b6e; margin-top: 4px; }
+  .foot { margin-top: 24px; font-size: 0.75rem; color: #7a7a8c; }
+  @media print {
+    body { padding: 0; }
+    .toolbar { display: none; }
+    tr { break-inside: avoid; }
+    h2 { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  
+
+  
+  <h1>Last 24 hours</h1>
+  <p class="sub">Simulated panel · Built-in simulator</p>
+  <p class="sub">2026-10-21 17:49 to 2026-10-22 17:49 · generated 2026-10-22 17:49</p>
+
+  
+  <div class="note"><strong>Simulated device.</strong> These numbers come from the built-in simulator, not a real solar panel.</div>
+  
+
+  
+  <div class="cards">
+    <div class="card"><div class="k">Energy</div><div class="v">2.2 Wh</div></div>
+    <div class="card"><div class="k">Average power</div><div class="v">37.5 W</div></div>
+    <div class="card"><div class="k">Peak power</div><div class="v">47.3 W</div></div>
+    <div class="card"><div class="k">Average voltage</div><div class="v">17.44 V</div></div>
+    <div class="card"><div class="k">Readings logged</div><div class="v">22</div></div>
+  </div>
+
+  
+
+  <h2>Detail (one row per 5 min)</h2>
+  <table>
+    <thead><tr><th>Time</th><th>Avg V</th><th>Avg A</th><th>Avg W</th><th>Peak W</th><th>Energy (Wh)</th><th>Readings</th></tr></thead>
+    <tbody>
+    
+      <tr><td>Oct 22 17:45</td><td>17.44</td><td>2.15</td>
+          <td>37.5</td><td>47.3</td>
+          <td>2.21</td><td>22</td></tr>
+    
+    </tbody>
+  </table>
+  
+
+  <p class="foot">Energy is calculated by adding up power × time between readings. Gaps where the device was not sending data are not counted. Times are shown in the server's local time zone.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Devices · Solar Monitor{% endblock %}
+
+{% block content %}
+<div class="stack">
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Devices</h1>
+      <p class="page-sub">Register each ESP32 here to get its API key and a ready-made Arduino sketch. Simulated devices let you try everything without hardware.</p>
+    </div>
+    <button id="add-btn" class="btn btn-primary" type="button">+ Add device</button>
+  </div>
+
+  <div id="device-error" class="alert-banner warn hidden" role="alert">
+    <span class="dot dot-warn"></span><span id="device-error-text"></span>
+  </div>
+
+  <div id="device-grid" class="device-grid"></div>
+  <p id="device-empty" class="empty hidden">No devices yet. Add one to get started.</p>
+</div>
+{% endblock %}
+
+{% block modals %}
+<dialog id="device-dialog" class="dialog">
+  <form id="device-form" method="dialog" novalidate>
+    <h2 id="device-dialog-title">Add device</h2>
+    <div class="form-grid">
+      <div class="span-2">
+        <label class="field-label" for="f-name">Name</label>
+        <input id="f-name" class="field-input" maxlength="40" required autocomplete="off" placeholder="e.g. Roof panel" />
+      </div>
+      <div class="span-2">
+        <label class="field-label" for="f-location">Location (optional)</label>
+        <input id="f-location" class="field-input" maxlength="60" autocomplete="off" placeholder="e.g. Rooftop, north side" />
+      </div>
+      <div>
+        <label class="field-label" for="f-rated">Panel rating (W)</label>
+        <input id="f-rated" class="field-input" type="number" min="1" max="10000" step="any" value="50" />
+        <p class="field-hint">Used to work out efficiency.</p>
+      </div>
+      <div>
+        <label class="field-label" for="f-interval">Send a reading every (s)</label>
+        <input id="f-interval" class="field-input" type="number" min="1" max="300" step="1" value="5" />
+        <p class="field-hint">The ESP32 adopts this automatically.</p>
+      </div>
+      <div class="span-2" id="f-sim-row">
+        <label class="switch"><input type="checkbox" id="f-sim" /><span class="switch-track"></span><span>Simulated device (no hardware, generates fake readings)</span></label>
+      </div>
+    </div>
+    <p id="device-form-error" class="form-error" role="alert"></p>
+    <div class="dialog-actions">
+      <button class="btn" type="button" id="device-cancel">Cancel</button>
+      <button class="btn btn-primary" type="submit" id="device-save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="key-dialog" class="dialog">
+  <h2 id="key-dialog-title">Connect your ESP32</h2>
+  <p class="field-hint">Your ESP32 sends readings to this address, signing each request with the key below. Treat the key like a password.</p>
+
+  <label class="field-label">Server address</label>
+  <div class="code-box"><code id="key-url"></code><button class="btn btn-sm" type="button" data-copy="key-url">Copy</button></div>
+
+  <label class="field-label">API key</label>
+  <div class="code-box"><code id="key-value"></code><button class="btn btn-sm" type="button" data-copy="key-value">Copy</button></div>
+
+  <div class="btn-row">
+    <a id="key-sketch" class="btn btn-primary" download>Download Arduino sketch</a>
+    <button id="key-regen" class="btn btn-danger" type="button">Make a new key</button>
+  </div>
+
+  <p class="field-hint" style="margin-top:14px">
+    The sketch already contains the address and key. Open it in the Arduino IDE, enter your Wi-Fi name and password, check the sensor settings at the top, and upload.
+    Making a new key stops the current ESP32 until you re-flash it.
+  </p>
+  <div class="dialog-actions"><button class="btn" type="button" id="key-close">Close</button></div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/account_management/devices.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{% block title %}Solar Monitor{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+{% block head %}{% endblock %}
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark">☀</span>
+        <span class="brand-name">Solar Monitor</span>
+      </a>
+      <div class="topbar-right">{% block topbar_right %}{% endblock %}</div>
+    </header>
+
+    {# One entry per page. The active tab is picked from the URL path. #}
+    {% set tabs = [("/", "Dashboard"), ("/analytics", "Analytics"), ("/reports", "Reports"),
+                   ("/alerts", "Alerts"), ("/devices", "Devices")] %}
+    <nav class="tabs" aria-label="Main">
+      {% for path, label in tabs %}
+      <a href="{{ path }}" class="tab {{ 'active' if request.path == path }}" {% if request.path == path %}aria-current="page"{% endif %}>{{ label }}{% if path == "/alerts" %} <span id="alert-badge" class="tab-badge hidden">0</span>{% endif %}</a>
+      {% endfor %}
+    </nav>
+
+    {% block content %}{% endblock %}
+  </div>
+
+  <div id="toast-root" class="toast-root" aria-live="polite"></div>
+
+  <dialog id="confirm-dialog" class="dialog">
+    <form method="dialog">
+      <p id="confirm-text" class="dialog-text"></p>
+      <div class="dialog-actions">
+        <button class="btn" value="cancel">Cancel</button>
+        <button class="btn btn-danger" id="confirm-ok" value="ok">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  {% block modals %}{% endblock %}
+
+  <script src="{{ url_for('static', filename='js/shared/common.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/shared/nav.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

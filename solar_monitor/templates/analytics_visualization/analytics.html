@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Analytics · Solar Monitor{% endblock %}
+
+{% block head %}
+<script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shared/chart-theme.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="stack">
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Analytics</h1>
+      <p class="page-sub">Trends over days and weeks. Switch to <strong>Logged</strong> to analyse what your devices have really recorded.</p>
+    </div>
+    <div class="btn-row" style="align-items:center">
+      <select id="a-device" class="select hidden" aria-label="Device"></select>
+      <div class="range-toggle" role="group" aria-label="Data source">
+        <button type="button" class="range-btn" data-source="simulated">Simulated</button>
+        <button type="button" class="range-btn" data-source="logged">Logged</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice">
+    <span class="notice-dot"></span>
+    <span id="source-note"></span>
+  </div>
+
+  <div id="a-empty" class="empty hidden"></div>
+
+  <div id="a-body" class="stack">
+    <section class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon icon-current">Σ</div>
+        <div class="stat-body">
+          <span class="stat-label">Total energy</span>
+          <span id="total-energy-value" class="stat-value">--</span>
+          <span id="total-energy-sub" class="stat-range">last 30 days</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-current">~</div>
+        <div class="stat-body">
+          <span class="stat-label">Average day</span>
+          <span id="avg-energy-value" class="stat-value">--</span>
+          <span class="stat-range">energy per day</span>
+        </div>
+      </div>
+      <div class="stat-card stat-card-accent">
+        <div class="stat-icon icon-power">↑</div>
+        <div class="stat-body">
+          <span class="stat-label">Best day</span>
+          <span id="best-day-value" class="stat-value">--</span>
+          <span id="best-day-date" class="stat-range">--</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-power">%</div>
+        <div class="stat-body">
+          <span class="stat-label">Efficiency</span>
+          <span id="avg-efficiency-value" class="stat-value">--</span>
+          <span class="stat-range">of panel rating</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="chart-card chart-card-tall">
+      <div class="chart-card-head">
+        <div>
+          <div class="card-title">Daily energy</div>
+          <div class="card-sub">Watt-hours produced each day</div>
+        </div>
+        <div class="range-toggle" role="group" aria-label="Time range">
+          <button type="button" class="range-btn" data-days="7">7 days</button>
+          <button type="button" class="range-btn" data-days="14">14 days</button>
+          <button type="button" class="range-btn" data-days="30">30 days</button>
+        </div>
+      </div>
+      <canvas id="energyChart"></canvas>
+      <p id="low-days-note" class="chart-note"></p>
+    </section>
+
+    <section class="chart-card chart-card-short">
+      <div class="chart-card-head">
+        <div>
+          <div class="card-title">Peak power</div>
+          <div class="card-sub">Highest reading each day, in watts</div>
+        </div>
+      </div>
+      <canvas id="peakChart"></canvas>
+    </section>
+
+    <section class="chart-card chart-card-short">
+      <div class="chart-card-head">
+        <div>
+          <div class="card-title">Power through the day</div>
+          <div id="hourly-sub" class="card-sub">Average power by hour</div>
+        </div>
+      </div>
+      <canvas id="hourlyChart"></canvas>
+    </section>
+
+    <section class="insight-grid">
+      <div class="insight-card">
+        <div class="card-title">Week over week</div>
+        <div class="card-sub insight-sub">Last 7 days compared with the 7 before</div>
+        <div id="compare-rows" class="compare-rows"></div>
+        <p class="chart-note">Always uses the latest 14 full days, whatever range is selected above.</p>
+      </div>
+
+      <div class="insight-card">
+        <div class="card-title">Estimated savings</div>
+        <div class="card-sub insight-sub">For the range selected above</div>
+        <label class="field-label" for="rate-input">Electricity rate (per kWh)</label>
+        <input id="rate-input" class="field-input" type="number" min="0" step="0.01" value="10" inputmode="decimal" />
+        <div class="savings-row">
+          <span class="savings-label" id="savings-label">Savings</span>
+          <span class="savings-value" id="savings-value">--</span>
+        </div>
+        <div class="savings-row">
+          <span class="savings-label">CO₂ avoided (est.)</span>
+          <span class="savings-value" id="co2-value">--</span>
+        </div>
+        <p class="chart-note">CO₂ assumes 0.5 kg per kWh, which varies by country and grid.</p>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analytics_visualization/analytics.js') }}"></script>
+{% endblock %}

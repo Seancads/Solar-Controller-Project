@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Solar Monitor{% endblock %}
+
+{% block head %}
+<script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shared/chart-theme.js') }}"></script>
+{% endblock %}
+
+{% block topbar_right %}
+  <select id="device-select" class="select" aria-label="Device"></select>
+  <div class="status-pill">
+    <span id="status-led" class="dot dot-stale"></span>
+    <span id="status">connecting</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="stack">
+  <div id="alert-banner" class="alert-banner hidden" role="alert">
+    <span class="dot dot-alert"></span>
+    <span id="alert-banner-text"></span>
+    <a href="/alerts">View alerts</a>
+  </div>
+
+  <div id="no-device" class="empty hidden">
+    No devices yet. <a class="nav-link" href="/devices">Add one on the Devices page →</a>
+  </div>
+
+  <section id="dashboard-body" class="stack">
+    <section class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon icon-voltage">V</div>
+        <div class="stat-body">
+          <span class="stat-label">Voltage</span>
+          <span id="voltage-value" class="stat-value">--</span>
+          <span id="voltage-range" class="stat-range">today --</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-current">A</div>
+        <div class="stat-body">
+          <span class="stat-label">Current</span>
+          <span id="current-value" class="stat-value">--</span>
+          <span id="current-range" class="stat-range">today --</span>
+        </div>
+      </div>
+      <div class="stat-card stat-card-accent">
+        <div class="stat-icon icon-power">W</div>
+        <div class="stat-body">
+          <span class="stat-label">Power</span>
+          <span id="power-value" class="stat-value">--</span>
+          <span id="power-range" class="stat-range">today --</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-peak">↑</div>
+        <div class="stat-body">
+          <span class="stat-label">Peak today</span>
+          <span id="peak-power-value" class="stat-value">--</span>
+          <span class="stat-range">highest power</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-current">Σ</div>
+        <div class="stat-body">
+          <span class="stat-label">Energy today</span>
+          <span id="energy-value" class="stat-value">--</span>
+          <span class="stat-range">since midnight</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="chart-card">
+      <div class="chart-card-head">
+        <div>
+          <div class="card-title">Live readings</div>
+          <div class="card-sub">Refreshes every 2 seconds</div>
+        </div>
+        <div class="range-toggle" role="group" aria-label="Time range">
+          <button type="button" class="range-btn" data-seconds="60">1 min</button>
+          <button type="button" class="range-btn" data-seconds="600">10 min</button>
+          <button type="button" class="range-btn" data-seconds="all">All</button>
+        </div>
+      </div>
+      <canvas id="mainChart"></canvas>
+    </section>
+  </section>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div id="offline-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <span class="dot dot-alert modal-dot"></span>
+    <h2>Connection lost</h2>
+    <p id="offline-modal-text">The dashboard hasn't heard from the server recently.</p>
+    <button id="offline-modal-dismiss" type="button">Dismiss</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analytics_visualization/dashboard.js') }}"></script>
+{% endblock %}

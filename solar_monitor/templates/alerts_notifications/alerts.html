@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}Alerts · Solar Monitor{% endblock %}
+
+{% block content %}
+<div class="stack">
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Alerts</h1>
+      <p class="page-sub">Problems are detected automatically, shown here and in the tab badge, and can also be sent to your phone or email.</p>
+    </div>
+    <div class="range-toggle" role="tablist" aria-label="Alerts sections">
+      <button type="button" class="range-btn" data-tab="alerts" role="tab">Alerts</button>
+      <button type="button" class="range-btn" data-tab="rules" role="tab">Rules</button>
+      <button type="button" class="range-btn" data-tab="notifications" role="tab">Notifications</button>
+    </div>
+  </div>
+
+  <!-- ===== Alerts ===== -->
+  <section id="tab-alerts" class="stack">
+    <div>
+      <div class="page-head" style="margin-bottom:10px">
+        <h2 class="section-title" style="margin:0">Active</h2>
+        <button id="ack-all" class="btn btn-sm hidden" type="button">Acknowledge all</button>
+      </div>
+      <div id="active-list" class="alert-list"></div>
+    </div>
+    <div>
+      <h2 class="section-title">History</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Started</th><th>Severity</th><th>Device</th><th>What happened</th><th>Lasted</th><th>Status</th></tr></thead>
+          <tbody id="history-body"></tbody>
+        </table>
+        <p id="history-empty" class="empty hidden">Nothing has gone wrong yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Rules ===== -->
+  <section id="tab-rules" class="stack hidden">
+    <p class="page-sub">An alert needs the problem to last for several readings in a row before it fires, and the same number of good readings before it clears. That stops a single noisy reading from raising a false alarm.</p>
+    <div id="rules-list" class="channel-list"></div>
+    <div class="btn-row">
+      <button id="rules-save" class="btn btn-primary" type="button">Save rules</button>
+    </div>
+    <p id="rules-error" class="form-error" role="alert"></p>
+  </section>
+
+  <!-- ===== Notifications ===== -->
+  <section id="tab-notifications" class="stack hidden">
+    <p class="page-sub">Alerts always appear in this app. Turn on a channel below to also get a message when something goes wrong. Nothing is sent until you enable a channel. Passwords and tokens are stored on this computer and never shown again.</p>
+
+    <div class="rule-card">
+      <div class="rule-title" style="margin-bottom:12px">When to send</div>
+      <div class="rule-fields">
+        <div>
+          <label class="field-label" for="n-minsev">Send alerts that are</label>
+          <select id="n-minsev" class="field-input select">
+            <option value="info">info and above (everything)</option>
+            <option value="warning">warning and above</option>
+            <option value="critical">critical only</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="n-cooldown">Same problem again after (s)</label>
+          <input id="n-cooldown" class="field-input" type="number" min="0" max="86400" step="1" />
+        </div>
+        <div style="align-self:end">
+          <label class="switch"><input type="checkbox" id="n-resolve" /><span class="switch-track"></span><span>Also tell me when it's fixed</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="channel-list">
+      <div class="channel-card" data-channel="webhook">
+        <div class="rule-head">
+          <span class="rule-title">Webhook (Slack, Discord or custom)</span>
+          <label class="switch"><input type="checkbox" id="w-enabled" /><span class="switch-track"></span><span>Enabled</span></label>
+        </div>
+        <p class="rule-help">Posts a message to a URL. Create an incoming webhook in Slack or Discord and paste its URL here.</p>
+        <div class="form-grid">
+          <div class="span-2">
+            <label class="field-label" for="w-url">Webhook URL</label>
+            <input id="w-url" class="field-input secret" type="password" autocomplete="off" />
+          </div>
+          <div>
+            <label class="field-label" for="w-format">Format</label>
+            <select id="w-format" class="field-input select">
+              <option value="generic">Generic JSON</option>
+              <option value="slack">Slack</option>
+              <option value="discord">Discord</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-sm test-btn" type="button" data-test="webhook">Save &amp; send test</button>
+          <span class="test-result" data-result="webhook"></span>
+        </div>
+      </div>
+
+      <div class="channel-card" data-channel="telegram">
+        <div class="rule-head">
+          <span class="rule-title">Telegram</span>
+          <label class="switch"><input type="checkbox" id="t-enabled" /><span class="switch-track"></span><span>Enabled</span></label>
+        </div>
+        <p class="rule-help">Create a bot with @BotFather to get a token, message your bot once, then enter your chat ID.</p>
+        <div class="form-grid">
+          <div>
+            <label class="field-label" for="t-token">Bot token</label>
+            <input id="t-token" class="field-input secret" type="password" autocomplete="off" />
+          </div>
+          <div>
+            <label class="field-label" for="t-chat">Chat ID</label>
+            <input id="t-chat" class="field-input" autocomplete="off" />
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-sm test-btn" type="button" data-test="telegram">Save &amp; send test</button>
+          <span class="test-result" data-result="telegram"></span>
+        </div>
+      </div>
+
+      <div class="channel-card" data-channel="email">
+        <div class="rule-head">
+          <span class="rule-title">Email</span>
+          <label class="switch"><input type="checkbox" id="e-enabled" /><span class="switch-track"></span><span>Enabled</span></label>
+        </div>
+        <p class="rule-help">Uses any SMTP server. For Gmail, use smtp.gmail.com, port 587, STARTTLS, and an app password (not your normal password).</p>
+        <div class="form-grid">
+          <div>
+            <label class="field-label" for="e-host">SMTP server</label>
+            <input id="e-host" class="field-input" autocomplete="off" placeholder="smtp.example.com" />
+          </div>
+          <div>
+            <label class="field-label" for="e-port">Port</label>
+            <input id="e-port" class="field-input" type="number" min="1" max="65535" />
+          </div>
+          <div>
+            <label class="field-label" for="e-security">Security</label>
+            <select id="e-security" class="field-input select">
+              <option value="starttls">STARTTLS (usually port 587)</option>
+              <option value="ssl">SSL/TLS (usually port 465)</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="e-user">Username (optional)</label>
+            <input id="e-user" class="field-input" autocomplete="off" />
+          </div>
+          <div>
+            <label class="field-label" for="e-pass">Password</label>
+            <input id="e-pass" class="field-input secret" type="password" autocomplete="new-password" />
+          </div>
+          <div>
+            <label class="field-label" for="e-from">From address</label>
+            <input id="e-from" class="field-input" type="email" autocomplete="off" />
+          </div>
+          <div class="span-2">
+            <label class="field-label" for="e-to">Send to (separate several with commas)</label>
+            <input id="e-to" class="field-input" autocomplete="off" />
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-sm test-btn" type="button" data-test="email">Save &amp; send test</button>
+          <span class="test-result" data-result="email"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="notify-save" class="btn btn-primary" type="button">Save notification settings</button>
+    </div>
+    <p id="notify-error" class="form-error" role="alert"></p>
+
+    <div>
+      <h2 class="section-title">Recent sends</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Time</th><th>Channel</th><th>Event</th><th>Result</th></tr></thead>
+          <tbody id="log-body"></tbody>
+        </table>
+        <p id="log-empty" class="empty hidden">No notifications have been sent yet.</p>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/alerts_notifications/alerts.js') }}"></script>
+{% endblock %}

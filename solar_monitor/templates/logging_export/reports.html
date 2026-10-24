@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Reports · Solar Monitor{% endblock %}
+
+{% block head %}
+<script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shared/chart-theme.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="stack">
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Reports</h1>
+      <p class="page-sub">Everything your devices send is logged automatically. Pick a period to see the numbers, export them, or print a report. A report for each day is also saved for you every night.</p>
+    </div>
+  </div>
+
+  <section class="insight-card">
+    <div class="filters">
+      <div>
+        <label class="field-label" for="r-device">Device</label>
+        <select id="r-device" class="field-input select"></select>
+      </div>
+      <div>
+        <label class="field-label" for="r-range">Period</label>
+        <select id="r-range" class="field-input select">
+          <option value="1h">Last hour</option>
+          <option value="6h">Last 6 hours</option>
+          <option value="24h" selected>Last 24 hours</option>
+          <option value="today">Today</option>
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+          <option value="custom">Custom dates…</option>
+        </select>
+      </div>
+      <div id="r-custom" class="filters hidden">
+        <div>
+          <label class="field-label" for="r-from">From</label>
+          <input id="r-from" class="field-input" type="date" />
+        </div>
+        <div>
+          <label class="field-label" for="r-to">To</label>
+          <input id="r-to" class="field-input" type="date" />
+        </div>
+      </div>
+      <button id="r-apply" class="btn btn-primary" type="button">Show report</button>
+    </div>
+    <p id="r-error" class="form-error" role="alert"></p>
+  </section>
+
+  <div id="r-empty" class="empty hidden"></div>
+
+  <section id="r-body" class="stack hidden">
+    <section class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon icon-current">Σ</div>
+        <div class="stat-body">
+          <span class="stat-label">Energy</span>
+          <span id="s-energy" class="stat-value">--</span>
+          <span id="s-label" class="stat-range">--</span>
+        </div>
+      </div>
+      <div class="stat-card stat-card-accent">
+        <div class="stat-icon icon-power">W</div>
+        <div class="stat-body">
+          <span class="stat-label">Average power</span>
+          <span id="s-avg" class="stat-value">--</span>
+          <span class="stat-range">of all readings</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-peak">↑</div>
+        <div class="stat-body">
+          <span class="stat-label">Peak power</span>
+          <span id="s-peak" class="stat-value">--</span>
+          <span class="stat-range">highest reading</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-voltage">V</div>
+        <div class="stat-body">
+          <span class="stat-label">Average voltage</span>
+          <span id="s-volt" class="stat-value">--</span>
+          <span id="s-volt-range" class="stat-range">--</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-current">#</div>
+        <div class="stat-body">
+          <span class="stat-label">Readings logged</span>
+          <span id="s-count" class="stat-value">--</span>
+          <span id="s-first" class="stat-range">--</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="chart-card chart-card-short">
+      <div class="chart-card-head">
+        <div>
+          <div class="card-title">Power over time</div>
+          <div id="chart-sub" class="card-sub">--</div>
+        </div>
+      </div>
+      <canvas id="reportChart"></canvas>
+    </section>
+
+    <section>
+      <div class="page-head" style="margin-bottom:10px">
+        <h2 class="section-title" style="margin:0">Table</h2>
+        <div class="btn-row">
+          <a id="x-summary" class="btn btn-sm" href="#">Download table (CSV)</a>
+          <a id="x-raw" class="btn btn-sm" href="#">Download every reading (CSV)</a>
+          <a id="x-print" class="btn btn-sm" href="#" target="_blank" rel="noopener">Print / save as PDF</a>
+          <button id="x-save" class="btn btn-sm btn-primary" type="button">Save this report</button>
+        </div>
+      </div>
+      <div class="table-wrap table-scroll" tabindex="0" aria-label="Report table, scrollable">
+        <table class="table">
+          <thead><tr><th>Time</th><th class="num">Avg V</th><th class="num">Avg A</th><th class="num">Avg W</th><th class="num">Peak W</th><th class="num">Energy (Wh)</th><th class="num">Readings</th></tr></thead>
+          <tbody id="r-table"></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="insight-card">
+    <h2 class="section-title">Saved reports</h2>
+    <p class="field-hint">Each night at midnight a report for the previous day is saved here automatically (CSV for spreadsheets, HTML to open or print). Reports you save yourself appear here too.</p>
+    <div id="saved-list" class="file-list"></div>
+  </section>
+
+  <section class="insight-card">
+    <h2 class="section-title">Logging settings</h2>
+    <div class="form-grid">
+      <div>
+        <label class="field-label" for="l-interval">Log a reading every (seconds)</label>
+        <input id="l-interval" class="field-input" type="number" min="5" max="60" step="1" />
+        <p class="field-hint">5 to 60. The live dashboard always updates faster than this.</p>
+      </div>
+      <div>
+        <label class="field-label" for="l-retention">Keep logged data for (days)</label>
+        <input id="l-retention" class="field-input" type="number" min="7" max="3650" step="1" />
+        <p class="field-hint">Older readings are deleted automatically.</p>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button id="l-save" class="btn btn-primary" type="button">Save</button>
+    </div>
+    <p id="l-error" class="form-error" role="alert"></p>
+    <p id="l-info" class="field-hint"></p>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/logging_export/reports.js') }}"></script>
+{% endblock %}
